@@ -1,24 +1,25 @@
 # Synthetic Ultrasound Spleen — DDPM
 
-A Denoising Diffusion Probabilistic Model (DDPM) that generates synthetic spleen ultrasound images using a U-Net backbone with attention. Trained on preprocessed `.npz` image files and designed to run on a GPU cluster (HPC).
+A Denoising Diffusion Probabilistic Model (DDPM) that generates synthetic spleen ultrasound images using a U-Net backbone with attention. This is one of 3 pipelines in the [SyntheticUltrasoundSpleen](https://github.com/brianvngan/SyntheticUltrasoundSpleen) repository.
 
 ---
 
 ## Project Structure
 
 ```
-SyntheticUltrasoundSpleen/
+ddpm_spleen/
 ├── ddpm.ipynb                        # Main training notebook
-├── README.md
-├── Preprocessed_Roboflow/            # Input dataset (.npz files)
-├── ddpm_chimera_checkpoints/         # Saved model checkpoints
-└── ddpm_chimera_results/             # Generated images & loss curves
+├── README_ddpm.md                    # This file
+├── ddpm_results/                     # Generated images & loss curves
+├── ddpm_chimera_checkpoints/         # Saved model checkpoints (not tracked in git)
+└── Processed_Roboflow/               # Input dataset (.npz files, not tracked in git)
 ```
 
 ---
 
 
 ## Running on CHIMERA24 (DGX H200)
+
 
 **1. Login to the cluster headnode via SSH:**
 ```bash
@@ -231,3 +232,5 @@ start_epoch = ckpt['epoch'] + 1
 - Mixed precision (`torch.amp`) is used automatically for faster training and lower memory usage
 - Gradient clipping (max norm = 1.0) is applied for training stability
 - If you run out of VRAM, reduce `BATCH_SIZE` or `base_ch` in the UNet constructor
+
+
