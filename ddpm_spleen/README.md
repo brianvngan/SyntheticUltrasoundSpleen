@@ -17,78 +17,50 @@ SyntheticUltrasoundSpleen/
 
 ---
 
-## Requirements
-
-### Hardware
-- NVIDIA GPU (CUDA required)
-- Recommended: 16GB+ VRAM for batch size 8 at 256×256
-
-### Software
-
-```bash
-pip install torch torchvision tqdm matplotlib numpy
-```
-
-Or with conda:
-
-```bash
-conda create -n ddpm python=3.10
-conda activate ddpm
-conda install pytorch torchvision pytorch-cuda=12.1 -c pytorch -c nvidia
-pip install tqdm matplotlib numpy
-```
-
-Verify your GPU is available:
-
-```python
-import torch
-print(torch.cuda.is_available())       # Should print True
-print(torch.cuda.get_device_name(0))   # Your GPU name
-```
-
----
 
 ## Running on CHIMERA24 (DGX H200)
 
-All IMPACT students have access to **CHIMERA24** (the new DGX H200).
+All IMPACT students have access to **CHIMERA24** (aka the NEW DGX H200!)
 
-> **Returning user?** If you've already set up on Chimera before, skip the one-time setup and jump to [Per-session workflow](#per-session-workflow).
+**1. Login to the cluster headnode via SSH:**
+```bash
+ssh first.last001@chimera.umb.edu
+```
+
+**DO NOT RUN JOBS HERE** — connect to the DGX H200 machine chimera24 like this:
+
+```bash
+salloc -c2 -A impact -q aicore --gres=gpu:1 --mem=32G -w chimera24 -p AICORE_H200 -t 60
+```
+
+This grabs 2 CPU cores, 32GB RAM, and 1 GPU for 60 minutes.
 
 ---
 
-### One-time setup (skip if already done)
+### Create Conda Environment
 
-The steps below are **per-account**, not per-project. If Miniconda is already installed and you have an `IMPACT` conda env from previous work, skip straight to the per-session workflow.
-
-<details>
-<summary><b>1. Install Miniconda</b> — skip if <code>which conda</code> already returns a path</summary>
-
+**2. Download and install Miniconda:**
 ```bash
 curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 chmod +x Mini*
 ./Mini*
 ```
-</details>
 
-<details>
-<summary><b>2. Create the IMPACT conda env</b> — skip if <code>conda env list</code> already shows <code>IMPACT</code></summary>
-
+**3. Create the IMPACT environment with PyTorch and Jupyter:**
 ```bash
-conda create -n IMPACT python=3.10 -y
+conda create -n IMPACT python=3.10
 conda activate IMPACT
+pip install torch torchvision tqdm matplotlib numpy
 pip install jupyterlab ipykernel
 ```
-</details>
 
-<details>
-<summary><b>3. One-time LD_LIBRARY_PATH setup</b> — skip if <code>ls $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh</code> already exists</summary>
-
+**4. Set up library paths (one-time):**
 ```bash
 mkdir -p $CONDA_PREFIX/etc/conda/activate.d
 nano $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
 ```
 
-Paste:
+Paste the following into the editor:
 
 ```bash
 export LD_LIBRARY_PATH=$(python - <<'PY'
@@ -101,78 +73,48 @@ PY
 ):$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
 ```
 
-Reload:
+Save and exit, then reload the environment:
 
 ```bash
 conda deactivate
 conda activate IMPACT
 ```
-</details>
 
-### Project dependencies (one-time per project)
-
-Inside the `IMPACT` env, install this project's requirements:
-
+**5. GPU test:**
 ```bash
-conda activate IMPACT
-pip install torch torchvision tqdm matplotlib numpy
-```
-
----
-
-### Per-session workflow
-
-Do these every time you come back to train.
-
-#### 1. SSH into the headnode
-
-```bash
-ssh <your-username>@chimera.umb.edu
-```
-
-**DO NOT RUN JOBS ON THE HEADNODE.** Allocate a compute node instead.
-
-#### 2. Allocate an H200
-
-**Quick test / sanity-check (60 min, 1 GPU):**
-
-```bash
-salloc -c2 -A impact -q aicore --gres=gpu:1 --mem=32G -w chimera24 -p AICORE_H200 -t 60
-```
-
-**Full training run (8 hours, 3 GPUs):**
-
-```bash
-salloc -c6 -A impact -q aicore --gres=gpu:3 --mem=96G -w chimera24 -p AICORE_H200 -t 480
-```
-
-#### 3. Activate the env and sanity-check the GPU
-
-```bash
-conda activate IMPACT
 python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
 ```
 
 Should print `True NVIDIA H200`.
 
-#### 4. Launch the notebook
+---
+
+### Launch the Notebook
 
 ```bash
-cd /path/to/SyntheticUltrasoundSpleen
-jupyter lab --no-browser --port=8888
+cd /path/to/SyntheticUltrasoundSpleen/ddpm_spleen
+jupyter lab --no-browser --port=8888 --ip=0.0.0.0
 ```
 
-Then open `ddpm.ipynb` and run all cells.
+In a new terminal on your local machine, set up the SSH tunnel:
+
+```bash
+ssh -L 8888:chimera24:8888 first.last001@chimera.umb.edu -N
+```
+
+Then open your browser and paste the URL shown in the Jupyter output (includes the token).
 
 ---
 
 ## Dataset
 
+The preprocessed dataset used for training is sourced from **Team 5** (`team5-data`) and is not included in this repository. Request access to the dataset from Team 5 and place it in the `Processed_Roboflow/` directory before training.
+
 The model expects grayscale ultrasound images stored as `.npz` files, each containing an `image` key with a 2D NumPy array.
 
 Expected dataset path (edit in the notebook config):
 ```
-/path/to/your/Preprocessed_Roboflow/
+/path/to/your/Processed_Roboflow/
 ```
 
 Each `.npz` file should contain:
