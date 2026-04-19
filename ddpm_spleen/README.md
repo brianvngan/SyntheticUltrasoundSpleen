@@ -20,8 +20,6 @@ SyntheticUltrasoundSpleen/
 
 ## Running on CHIMERA24 (DGX H200)
 
-All IMPACT students have access to **CHIMERA24** (aka the NEW DGX H200!)
-
 **1. Login to the cluster headnode via SSH:**
 ```bash
 ssh first.last001@chimera.umb.edu
