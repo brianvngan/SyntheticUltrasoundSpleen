@@ -11,3 +11,7 @@ Inside the SpleenCycleGan file is the pipeline for creating synthetic spleen ima
 
 DDPM (ddpm_spleen/ddpm.ipynb):
  Denoising Diffusion Probabilistic Model with a U-Net backbone and attention, trained from scratch on spleen ultrasound images using processed roboflow data from team5-data.  For detailed setup please see the README inside the ddpm_spleen directory.
+
+ ## Acknowledgements
+- [Denoising Diffusion Probabilistic Models](https://github.com/hojonathanho/diffusion) — Ho et al., 2020
+- [CycleGAN and pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix) — Zhu et al., 2017
